@@ -79,10 +79,11 @@ class MainWindow(QMainWindow):
         """
         Entry point for handling loaded files via either Drag & Drop or File Browser.
         """
+        filename=os.path.basename(file_path)
         self.status.showMessage(f"Loading file: {file_path}")
 
         # Temporary visual feedback to confirm it works:
-        self.preview_widget.setText(f"File Received:\n\n{file_path}\n")
+        self.preview_widget.display_image(file_path)
 
     @Slot()
     def handle_export(self):
