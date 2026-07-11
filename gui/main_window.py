@@ -3,10 +3,12 @@ from PySide6.QtWidgets import QMainWindow, QSplitter, QStatusBar, QFileDialog # 
 from PySide6.QtCore import Slot, Qt
 import os
 
+import services.metadata
 from gui.preview import PreviewWidget
 from gui.metadata_tabs import MetadataTabs
 from gui.toolbar import ToolBar
 from gui.menu_bar import MenuBar
+from services.metadata import MetadataService
 
 
 class MainWindow(QMainWindow):
@@ -15,8 +17,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("MetaLens")
         self.resize(1400, 850)
+        self.metadata_service =  MetadataService()
         self.setup_ui()
-
     def setup_ui(self):
         # 1. Instantiate Actions / Bars
         self.menu_bar = MenuBar(self)
@@ -76,14 +78,15 @@ class MainWindow(QMainWindow):
 
     @Slot(str)
     def load_file(self, file_path: str):
-        """
-        Entry point for handling loaded files via either Drag & Drop or File Browser.
-        """
+
         filename=os.path.basename(file_path)
         self.status.showMessage(f"Loading file: {file_path}")
 
         # Temporary visual feedback to confirm it works:
         self.preview_widget.display_image(file_path)
+        parsed_data = self.metadata_service.extract_metadata(file_path)
+        self.metadata_tabs.display_metadata(parsed_data)
+        self.status.showMessage(f"{filename} Successfully analysed")
 
     @Slot()
     def handle_export(self):

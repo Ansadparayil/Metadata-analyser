@@ -1,11 +1,12 @@
 # services/metadata.py
 import exiftool
 import os
+from services.geocoder import GeocoderService
 
 
 class MetadataService:
     def __init__(self):
-        # The wrapper looks for the system 'exiftool' binary automatically
+        self.geocoder = GeocoderService()
         pass
 
     def extract_metadata(self, file_path: str) -> dict:
