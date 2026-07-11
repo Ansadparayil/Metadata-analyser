@@ -1,6 +1,7 @@
 # gui/main_window.py
-from PySide6.QtWidgets import QMainWindow, QSplitter, QStatusBar
+from PySide6.QtWidgets import QMainWindow, QSplitter, QStatusBar, QFileDialog # Added QFileDialog
 from PySide6.QtCore import Slot, Qt
+import os
 
 from gui.preview import PreviewWidget
 from gui.metadata_tabs import MetadataTabs
@@ -56,10 +57,32 @@ class MainWindow(QMainWindow):
         self.menu_bar.exit_requested.connect(self.close)
         self.menu_bar.toggle_toolbar_requested.connect(self.handle_toggle_toolbar)
         self.menu_bar.toggle_dark_mode_requested.connect(self.handle_toggle_dark_mode)
+        self.preview_widget.file_dropped.connect(self.load_file)
 
     @Slot()
     def handle_open_file(self):
         self.status.showMessage("Opening file browser...")
+
+        # Open standard file selector supporting standard image and video extensions
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Media File",
+            "",
+            "Media Files (*.jpg *.jpeg *.png *.heic *.mp4 *.mov *.avi);;All Files (*.*)"
+        )
+
+        if file_path:
+            self.load_file(file_path)
+
+    @Slot(str)
+    def load_file(self, file_path: str):
+        """
+        Entry point for handling loaded files via either Drag & Drop or File Browser.
+        """
+        self.status.showMessage(f"Loading file: {file_path}")
+
+        # Temporary visual feedback to confirm it works:
+        self.preview_widget.setText(f"File Received:\n\n{file_path}\n")
 
     @Slot()
     def handle_export(self):
