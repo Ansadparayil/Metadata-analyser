@@ -1,84 +1,57 @@
-from PySide6.QtGui import QAction
+# gui/menu_bar.py
 from PySide6.QtWidgets import QMenuBar
+from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtCore import Signal
 
 
 class MenuBar(QMenuBar):
+    # Signals to communicate intent cleanly out to the MainWindow controller
+    open_requested = Signal()
+    export_requested = Signal()
+    clean_requested = Signal()
+    exit_requested = Signal()
+    toggle_toolbar_requested = Signal(bool)
+    toggle_dark_mode_requested = Signal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._init_menus()
 
-        self.create_file_menu()
-        self.create_view_menu()
-        self.create_tools_menu()
-        self.create_help_menu()
+    def _init_menus(self):
+        # File Menu
+        file_menu = self.addMenu("&File")
 
-    def create_file_menu(self):
+        open_act = QAction("&Open File...", self)
+        open_act.setShortcut(QKeySequence.Open)
+        open_act.triggered.connect(self.open_requested.emit)
+        file_menu.addAction(open_act)
 
-        file_menu = self.addMenu("File")
-
-        open_action = QAction("Open File...", self)
-        export_action = QAction("Export Metadata", self)
-        compare_action = QAction("Compare Files", self)
-        exit_action = QAction("Exit", self)
-
-        file_menu.addAction(open_action)
-        file_menu.addAction(export_action)
-        file_menu.addAction(compare_action)
+        export_act = QAction("&Export...", self)
+        export_act.setShortcut(QKeySequence.Save)
+        export_act.triggered.connect(self.export_requested.emit)
+        file_menu.addAction(export_act)
 
         file_menu.addSeparator()
 
-        file_menu.addAction(exit_action)
+        exit_act = QAction("E&xit", self)
+        exit_act.triggered.connect(self.exit_requested.emit)
+        file_menu.addAction(exit_act)
 
+        # View Menu
+        view_menu = self.addMenu("&View")
 
-    def create_view_menu(self):
+        toggle_tb_act = QAction("Show &Toolbar", self, checkable=True)
+        toggle_tb_act.setChecked(True)
+        toggle_tb_act.triggered.connect(self.toggle_toolbar_requested.emit)
+        view_menu.addAction(toggle_tb_act)
 
-        view_menu = self.addMenu("View")
+        dark_act = QAction("Dark &Theme", self, checkable=True)
+        dark_act.triggered.connect(self.toggle_dark_mode_requested.emit)
+        view_menu.addAction(dark_act)
 
-        toolbar_action = QAction(
-            "Show Toolbar",
-            self
-        )
+        # Tools Menu
+        tools_menu = self.addMenu("&Tools")
 
-        status_action = QAction(
-            "Show Status Bar",
-            self
-        )
-
-        dark_action = QAction(
-            "Toggle Dark Mode",
-            self
-        )
-
-        view_menu.addAction(toolbar_action)
-        view_menu.addAction(status_action)
-        view_menu.addAction(dark_action)
-
-
-    def create_tools_menu(self):
-
-        tools_menu = self.addMenu("Tools")
-
-        clean_action = QAction(
-            "Remove Metadata",
-            self
-        )
-
-        settings_action = QAction(
-            "Settings",
-            self
-        )
-
-        tools_menu.addAction(clean_action)
-        tools_menu.addAction(settings_action)
-
-
-    def create_help_menu(self):
-
-        help_menu = self.addMenu("Help")
-
-        about_action = QAction(
-            "About MetaLens",
-            self
-        )
-
-        help_menu.addAction(about_action)
+        clean_act = QAction("&Clean Metadata", self)
+        clean_act.triggered.connect(self.clean_requested.emit)
+        tools_menu.addAction(clean_act)
